@@ -73,3 +73,12 @@ The queries are defined as a linked list of (query_string, handler) pairs
 --DISTRIBUTED QUERY COMPLETENESS--
 The server FIRST checks if there are any records in House B before and after the sharing started. Then it returns the count of the records to the server in the response. 
 If the time window predates the sharing agreement, the server will report the count of the records in House B prior to the sharing beginning.
+
+
+
+Part A Information:
+
+1) The server uses psycopg2 to connect to NeonDB using the connection string. It then queries the database for the table_virtual database and filters for the records with the parent_asset_uid to get the data from the device of interest.
+2) Distributed query processing is implemented by fetching the data for each house separately and then combining that data on the server so that the client receives a single answer to the query.
+3) The query processing logic determines whether the records from House B should be examined for whether they fall before or after the sharing start timestamp. If they fall before that timestamp, the server will note the number of such records so that the system is aware that the query may return incomplete data in a distributed system.
+4) The system uses the metadata fields of the records (specifically the parent_asset_uid, board_name, and asset_uid fields) to determine which house owns each record, and to route the records to the correct query handler that will process the record. The sharing feature between the two houses is simulated by a hardcoded timestamp that indicates when House B started sharing its data with House A.
